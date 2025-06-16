@@ -57,7 +57,7 @@ Client --> VanitySSL --> Backend Service
 
 5. **Configuration and Launch**
    - Read environment variables for backend address, database location, ACME email, and other settings.
-  - Start the proxy server with HTTPS enabled and serve the internal API on a separate port (port `8081` by default).
+  - Start the proxy server with HTTPS enabled. Requests with the hostname specified in `VANITY_API_HOSTNAME` are served by the internal API; all others are proxied to the backend.
 
 6. **Testing and Logging**
    - Add unit tests for the store interface and API logic.
@@ -79,13 +79,13 @@ Build and run the container:
 
 ```sh
 docker build -t vanityssl .
-docker run -p 80:80 -p 443:443 -p 8081:8081 \
+docker run -p 80:80 -p 443:443 \
   -e BACKEND_URL=https://backend.internal \
   -e ACME_EMAIL=admin@example.com \
   -e PROXY_SECRET=changeme \
   vanityssl
 ```
 
-Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), database path (`DB_PATH`), and the proxy signing secret (`PROXY_SECRET`). The API is reachable on port `8081`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
+Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), database path (`DB_PATH`), the proxy signing secret (`PROXY_SECRET`), and the API hostname (`VANITY_API_HOSTNAME`). Requests for the configured hostname are served by the internal API on port `443`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
 
 A simple test backend is available in `cmd/dummybackend`. It prints request information and verifies the signature.

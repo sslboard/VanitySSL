@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/example/vanityssl/internal/api"
 	"github.com/example/vanityssl/internal/proxy"
@@ -42,17 +43,23 @@ func main() {
 
 	apiToken := os.Getenv("API_TOKEN")
 	apiServer := api.New(cacheStore, apiToken)
+	apiHostname := strings.ToLower(os.Getenv("VANITY_API_HOSTNAME"))
 
 	p := proxy.New(bURL, cacheStore, cm)
 
 	r := mux.NewRouter()
 
-	r.PathPrefix("/").Handler(p)
+	if apiHostname != "" {
+		r.MatcherFunc(func(req *http.Request, m *mux.RouteMatch) bool {
+			host := strings.ToLower(req.Host)
+			if strings.Contains(host, ":") {
+				host = strings.Split(host, ":")[0]
+			}
+			return host == apiHostname
+		}).Handler(apiServer.Router())
+	}
 
-	go func() {
-		log.Println("Internal API running on :8081")
-		http.ListenAndServe(":8081", apiServer.Router())
-	}()
+	r.PathPrefix("/").Handler(p)
 
 	go func() {
 		log.Println("ACME HTTP challenge on :80")
