@@ -16,10 +16,10 @@ VanitySSL/
 ```
 
 ## cmd/vanityssl
-Contains `main.go`, which reads configuration from environment variables (12‑factor style), constructs the components, and starts the HTTPS proxy. The internal API runs on a separate HTTP port.
+Contains `main.go`, which reads configuration from environment variables (12‑factor style), constructs the components, and starts the HTTPS proxy. Requests to the hostname specified by `VANITY_API_HOSTNAME` are served by the internal API.
 
 ## internal/api
-Defines an `API` type that exposes CRUD endpoints for customer domain mappings. An optional bearer token protects the endpoints. The API is exposed via a dedicated HTTP server on port `8081` by default.
+Defines an `API` type that exposes CRUD endpoints for customer domain mappings. An optional bearer token protects the endpoints. The API is served on the main HTTPS port and selected via `VANITY_API_HOSTNAME`.
 
 ## internal/model
 Holds simple structs shared between packages. The MVP only defines the `Customer` model.
