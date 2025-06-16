@@ -46,6 +46,7 @@ func main() {
 	p := proxy.New(bURL, cacheStore, cm)
 
 	r := mux.NewRouter()
+
 	r.PathPrefix("/").Handler(p)
 
 	go func() {
@@ -58,7 +59,7 @@ func main() {
 		http.ListenAndServe(":80", cm.HTTPHandler(nil))
 	}()
 
-	log.Println("Proxy running on :https (port 443)")
+  log.Println("Proxy running on :https (port 443)")
 	server := &http.Server{
 		Addr:      ":443",
 		Handler:   cm.HTTPHandler(r),
