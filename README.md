@@ -8,7 +8,7 @@ A SaaS provider often wants customers to access the service via a custom domain,
 
 1. Terminates TLS for each custom domain using SNI to determine which certificate to present.
 2. Obtains and renews TLS certificates from an ACME provider such as Let's Encrypt.
-3. Proxies requests to the SaaS backend, adding headers so the backend knows which customer the request belongs to.
+3. Proxies requests to the SaaS backend, adding headers so the backend knows which customer the request belongs to. Requests are signed with `X-Vanity-Signature` using the `PROXY_SECRET` environment variable so the backend can verify they came through VanitySSL.
 4. Provides an internal API for managing customers and domain mappings.
 
 Customers create a CNAME from their chosen domain to the SaaS endpoint (e.g., `app.saas.com`). VanitySSL sees the incoming SNI and serves the correct certificate for that domain, then forwards the request to the backend service (e.g., `backend.saas.com`).
@@ -82,7 +82,10 @@ docker build -t vanityssl .
 docker run -p 80:80 -p 443:443 -p 8081:8081 \
   -e BACKEND_URL=https://backend.internal \
   -e ACME_EMAIL=admin@example.com \
+  -e PROXY_SECRET=changeme \
   vanityssl
 ```
 
-Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), and database path (`DB_PATH`). The API is reachable on port `8081`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
+Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), database path (`DB_PATH`), and the proxy signing secret (`PROXY_SECRET`). The API is reachable on port `8081`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
+
+A simple test backend is available in `cmd/dummybackend`. It prints request information and verifies the signature.
