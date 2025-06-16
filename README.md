@@ -72,3 +72,17 @@ Client --> VanitySSL --> Backend Service
 
 VanitySSL's goal is to simplify managing custom domains with TLS so SaaS providers can offer branded endpoints to their customers with minimal operational overhead.
 
+
+## Running with Docker
+
+Build and run the container:
+
+```sh
+docker build -t vanityssl .
+docker run -p 443:443 -p 8081:8081 \
+  -e BACKEND_URL=https://backend.internal \
+  -e ACME_EMAIL=admin@example.com \
+  vanityssl
+```
+
+Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), and database path (`DB_PATH`). Certificates are stored in the configured database.
