@@ -26,22 +26,27 @@ func main() {
 	if dbPath == "" {
 		dbPath = "./data"
 	}
-	store, err := store.NewBadgerStore(dbPath)
+	backendStore, err := store.NewBadgerStore(dbPath)
 	if err != nil {
 		log.Fatalf("error opening store: %v", err)
 	}
-	defer store.Close()
+	defer backendStore.Close()
+
+	cacheStore, err := store.NewCachedStore(backendStore, 1000)
+	if err != nil {
+		log.Fatalf("error creating cache: %v", err)
+	}
 
 	email := os.Getenv("ACME_EMAIL")
-	cm := proxy.NewAutoCertManager(store, email, autocert.HostWhitelist())
+	cm := proxy.NewAutoCertManager(cacheStore, email, autocert.HostWhitelist())
 
 	apiToken := os.Getenv("API_TOKEN")
-	apiServer := api.New(store, apiToken)
+	apiServer := api.New(cacheStore, apiToken)
 
-	p := proxy.New(bURL, store, cm)
+	p := proxy.New(bURL, cacheStore, cm)
 
 	r := mux.NewRouter()
-	r.PathPrefix("/api/").Handler(http.StripPrefix("/api", apiServer.Router()))
+
 	r.PathPrefix("/").Handler(p)
 
 	go func() {
@@ -49,7 +54,12 @@ func main() {
 		http.ListenAndServe(":8081", apiServer.Router())
 	}()
 
-	log.Println("Proxy running on :https (port 443)")
+	go func() {
+		log.Println("ACME HTTP challenge on :80")
+		http.ListenAndServe(":80", cm.HTTPHandler(nil))
+	}()
+
+  log.Println("Proxy running on :https (port 443)")
 	server := &http.Server{
 		Addr:      ":443",
 		Handler:   cm.HTTPHandler(r),

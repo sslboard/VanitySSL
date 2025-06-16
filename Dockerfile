@@ -5,5 +5,6 @@ RUN go build -o /bin/vanityssl ./cmd/vanityssl
 
 FROM alpine:3.18
 COPY --from=builder /bin/vanityssl /bin/vanityssl
-EXPOSE 443 8081
+EXPOSE 80 443 8081
+
 CMD ["/bin/vanityssl"]

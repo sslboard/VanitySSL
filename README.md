@@ -49,7 +49,7 @@ Client --> VanitySSL --> Backend Service
    - Store certificates in the configured `Store` implementation.
 
 3. **Reverse Proxy**
-   - Create a proxy handler that looks up the customer via SNI, adds identifying headers (e.g., `X-Customer-ID`), and forwards the request to the configured backend.
+  - Create a proxy handler that looks up the customer via SNI, adds identifying headers (e.g., `X-Customer-ID` and `X-Customer-Domain`), and forwards the request to the configured backend.
 
 4. **Internal API**
    - Implement HTTP endpoints for creating, reading, updating, and deleting customer records.
@@ -57,7 +57,7 @@ Client --> VanitySSL --> Backend Service
 
 5. **Configuration and Launch**
    - Read environment variables for backend address, database location, ACME email, and other settings.
-   - Start the proxy server with HTTPS enabled and serve the internal API on a separate port or path.
+  - Start the proxy server with HTTPS enabled and serve the internal API on a separate port (port `8081` by default).
 
 6. **Testing and Logging**
    - Add unit tests for the store interface and API logic.
@@ -79,10 +79,10 @@ Build and run the container:
 
 ```sh
 docker build -t vanityssl .
-docker run -p 443:443 -p 8081:8081 \
+docker run -p 80:80 -p 443:443 -p 8081:8081 \
   -e BACKEND_URL=https://backend.internal \
   -e ACME_EMAIL=admin@example.com \
   vanityssl
 ```
 
-Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), and database path (`DB_PATH`). Certificates are stored in the configured database.
+Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), and database path (`DB_PATH`). The API is reachable on port `8081`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.

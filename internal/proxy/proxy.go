@@ -29,6 +29,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadGateway)
 		return
 	}
+	r.Header.Set("X-Customer-Domain", host)
 	if customerID != "" {
 		r.Header.Set("X-Customer-ID", customerID)
 	}

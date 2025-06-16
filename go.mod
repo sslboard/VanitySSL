@@ -5,6 +5,7 @@ go 1.23.8
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/gorilla/mux v1.8.1
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	golang.org/x/crypto v0.39.0
 )
 
