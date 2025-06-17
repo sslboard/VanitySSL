@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/example/vanityssl/internal/api"
@@ -33,7 +34,14 @@ func main() {
 	}
 	defer backendStore.Close()
 
-	cacheStore, err := store.NewCachedStore(backendStore, 1000)
+	cacheSize := 1000
+	if v := os.Getenv("CACHE_SIZE"); v != "" {
+		if i, err := strconv.Atoi(v); err == nil && i > 0 {
+			cacheSize = i
+		}
+	}
+
+	cacheStore, err := store.NewCachedStore(backendStore, cacheSize)
 	if err != nil {
 		log.Fatalf("error creating cache: %v", err)
 	}
