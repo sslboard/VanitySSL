@@ -12,7 +12,11 @@ import (
 )
 
 func verifySignature(customer, domain, sig, secret string) bool {
-	if secret == "" || sig == "" {
+	if secret == "" {
+		// Signature verification disabled
+		return true
+	}
+	if sig == "" {
 		return false
 	}
 	h := hmac.New(sha256.New, []byte(secret))

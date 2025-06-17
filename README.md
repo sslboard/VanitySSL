@@ -86,6 +86,6 @@ docker run -p 80:80 -p 443:443 \
   vanityssl
 ```
 
-Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), database path (`DB_PATH`), the proxy signing secret (`PROXY_SECRET`), and the API hostname (`VANITY_API_HOSTNAME`). Requests for the configured hostname are served by the internal API on port `443`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
+Environment variables configure the backend address, ACME email, optional API token (`API_TOKEN`), database path (`DB_PATH`), the proxy signing secret (`PROXY_SECRET`), the API hostname (`VANITY_API_HOSTNAME`), and the LRU cache size (`CACHE_SIZE`, default `1000`). Requests for the configured hostname are served by the internal API on port `443`. Port `80` must be reachable for the ACME HTTP-01 challenge. Certificates are stored in the configured database.
 
-A simple test backend is available in `cmd/dummybackend`. It prints request information and verifies the signature.
+A simple test backend is available in `cmd/dummybackend`. It prints request information and verifies the signature when `PROXY_SECRET` is set.
